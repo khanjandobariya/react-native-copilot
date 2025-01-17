@@ -18,16 +18,17 @@ export const useStepsMap = () => {
   const [steps, dispatch] = useReducer((state: StepsMap, action: Action) => {
     switch (action.type) {
       case "register":
+        if(!action.step.name) return state
         return {
           ...state,
           [action.step.name]: action.step,
         };
-      case "unregister": {
-        const { [action.stepName]: _, ...rest } = state;
-        return rest;
-      }
-      default:
-        return state;
+        case "unregister": {
+          const { [action.stepName]: _, ...rest } = state;
+          return rest;
+        }
+        default:
+          return state;
     }
   }, {});
 
@@ -53,7 +54,7 @@ export const useStepsMap = () => {
 
   const totalStepsNumber = useMemo(() => orderedSteps.length, [orderedSteps]);
 
-  const getFirstStep = useCallback(() => orderedSteps[0], [orderedSteps]);
+  const getFirstStep = useCallback(() =>orderedSteps[0], [orderedSteps,steps]);
 
   const getLastStep = useCallback(
     () => orderedSteps[orderedSteps.length - 1],

@@ -9,6 +9,8 @@ import {
 import Svg, { Path } from "react-native-svg";
 
 import type { MaskProps, SvgMaskPathFunction, ValueXY } from "../types";
+import { useCopilot } from "../index";
+import Const from "../Const";
 
 const AnimatedSvgPath = Animated.createAnimatedComponent(Path);
 const windowDimensions = Dimensions.get("window");
@@ -18,14 +20,12 @@ const defaultSvgPath: SvgMaskPathFunction = ({
   position,
   canvasSize,
 }): string => {
+  const cornerRadius = Number(Const.radiusBorder[Const.activeCoPilotStep]) || 0;
   const positionX = (position.x as any)._value as number;
   const positionY = (position.y as any)._value as number;
   const sizeX = (size.x as any)._value as number;
   const sizeY = (size.y as any)._value as number;
-
-  return `M0,0H${canvasSize.x}V${canvasSize.y}H0V0ZM${positionX},${positionY}H${
-    positionX + sizeX
-  }V${positionY + sizeY}H${positionX}V${positionY}Z`;
+  return `M0,0H${canvasSize.x}V${canvasSize.y}H0V0ZM${positionX + cornerRadius}, ${positionY}H${positionX + sizeX - cornerRadius}Q${positionX + sizeX}, ${positionY} ${positionX + sizeX}, ${positionY + cornerRadius}V${positionY + sizeY - cornerRadius}Q${positionX + sizeX}, ${positionY + sizeY} ${positionX + sizeX - cornerRadius}, ${positionY + sizeY}H${positionX + cornerRadius}Q${positionX}, ${positionY + sizeY} ${positionX}, ${positionY + sizeY - cornerRadius}V${positionY + cornerRadius}Q${positionX}, ${positionY} ${positionX + cornerRadius}, ${positionY}Z`;
 };
 
 export const SvgMask = ({
@@ -33,7 +33,7 @@ export const SvgMask = ({
   position,
   style,
   easing = Easing.linear,
-  animationDuration = 300,
+  animationDuration = 500,
   animated,
   backdropColor,
   svgMaskPath = defaultSvgPath,
@@ -41,8 +41,8 @@ export const SvgMask = ({
   currentStep,
 }: MaskProps) => {
   const [canvasSize, setCanvasSize] = useState<ValueXY>({
-    x: windowDimensions.width,
-    y: windowDimensions.height,
+    x: (windowDimensions.width - 100),
+    y: (windowDimensions.height - 100),
   });
   const sizeValue = useRef<Animated.ValueXY>(
     new Animated.ValueXY(size)
@@ -57,7 +57,7 @@ export const SvgMask = ({
       size: sizeValue,
       position: positionValue,
       canvasSize,
-      step: currentStep,
+      step: currentStep
     });
 
     if (maskRef.current) {
@@ -139,7 +139,7 @@ export const SvgMask = ({
               size: sizeValue,
               position: positionValue,
               canvasSize,
-              step: currentStep,
+              step: currentStep
             })}
           />
         </Svg>

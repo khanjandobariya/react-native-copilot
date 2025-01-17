@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState,
   type PropsWithChildren,
+  useEffect,
 } from "react";
 import { findNodeHandle, type ScrollView } from "react-native";
 import {
@@ -64,6 +65,7 @@ export const CopilotProvider = ({
 
   const [visible, setVisibility] = useStateWithAwait(false);
   const [scrollView, setScrollView] = useState<ScrollView | null>(null);
+  const firstStepRef = useRef<any>(null)
 
   const {
     currentStep,
@@ -78,8 +80,13 @@ export const CopilotProvider = ({
     setCurrentStepState,
     steps,
     registerStep,
-    unregisterStep,
+    unregisterStep
   } = useStepsMap();
+
+  useEffect(()=>{
+    firstStepRef.current = getFirstStep()
+  },[getFirstStep])
+
 
   const moveModalToStep = useCallback(
     async (step: Step) => {
@@ -92,7 +99,7 @@ export const CopilotProvider = ({
       await modal.current?.animateMove({
         width: size.width + OFFSET_WIDTH,
         height: size.height + OFFSET_WIDTH,
-        x: size.x - OFFSET_WIDTH / 2,
+        x: size.x - OFFSET_WIDTH / 2 > 0 ? size.x - OFFSET_WIDTH / 2 : 0,
         y: size.y - OFFSET_WIDTH / 2 + verticalOffset,
       });
     },
@@ -135,13 +142,11 @@ export const CopilotProvider = ({
         setScrollView(suppliedScrollView);
       }
 
-      const currentStep = fromStep ? steps[fromStep] : getFirstStep();
-
+      const currentStep = fromStep ? steps[fromStep] :firstStepRef.current;
       if (startTries.current > MAX_START_TRIES) {
         startTries.current = 0;
         return;
       }
-
       if (currentStep == null) {
         startTries.current += 1;
         requestAnimationFrame(() => {
@@ -169,6 +174,7 @@ export const CopilotProvider = ({
   const stop = useCallback(async () => {
     await setVisibility(false);
     copilotEvents.emit("stop");
+    setScrollView(null)
   }, [copilotEvents, setVisibility]);
 
   const next = useCallback(async () => {
@@ -202,6 +208,7 @@ export const CopilotProvider = ({
       isLastStep,
       currentStepNumber,
       totalStepsNumber,
+      getFirstStep
     }),
     [
       registerStep,
@@ -217,7 +224,7 @@ export const CopilotProvider = ({
       isFirstStep,
       isLastStep,
       currentStepNumber,
-      totalStepsNumber,
+      totalStepsNumber
     ]
   );
 

@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Button
 } from "react-native";
 import {
   CopilotProvider,
@@ -20,9 +21,10 @@ const WalkthroughableText = walkthroughable(Text);
 const WalkthroughableImage = walkthroughable(Image);
 
 function App() {
-  const { start, copilotEvents } = useCopilot();
+  const { start, copilotEvents,unregisterStep} = useCopilot();
   const [secondStepActive, setSecondStepActive] = useState(true);
   const [lastEvent, setLastEvent] = useState(null);
+  const 
 
   useEffect(() => {
     copilotEvents.on("stepChange", (step) => {
@@ -35,6 +37,11 @@ function App() {
       setLastEvent(`stop`);
     });
   }, [copilotEvents]);
+
+  const onPressUnregisterSteps = () => {
+    const allSteps = ['openApp','secondText','thirdText']
+    allSteps.map((item)=>unregisterStep(item))
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -115,6 +122,7 @@ function App() {
           color="#888"
         />
       </View>
+      <Button title={'Unregister the steps'} onPress={onPressUnregisterSteps}/>
     </SafeAreaView>
   );
 }
